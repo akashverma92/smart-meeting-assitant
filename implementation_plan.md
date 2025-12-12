@@ -34,20 +34,20 @@
 ---
 
 ### Day 2: Core UI & Authentication
-*Objective: Build the visual shell and user identity layer.*
+*Objective: Build the visual shell and user identity layer with a premium Landing Page.*
 
 **🔥 Priority Tasks (Functional)**
-- [ ] **Authentication Backend**: Set up JWT loginc.
-- [ ] **Login/Signup Pages**: Connect forms to auth endpoints.
+- [ ] **Authentication Backend**: Set up JWT logic on the server.
+- [ ] **Auth Modal**: Implement Shadcn `Dialog` for Login/Signup (no separate pages).
 
 **🚧 Middle Priority (Functional)**
-- [ ] **Dashboard Logic**: Fetch user session state on load.
+- [ ] **Dashboard Logic**: Redirect to dashboard after successful login.
 - [ ] **Protected Routes**: Create wrappers to secure meeting pages.
 
 **🎨 Non-Functional Tasks**
-- [ ] **Landing Page Design**: Create a "Wow" factor hero section (Glassmorphism, gradients).
-- [ ] **UI Components**: Generate buttons, inputs, cards using Shadcn/UI.
-- [ ] **Responsiveness**: Ensure mobile-friendly layout for the dashboard.
+- [ ] **Landing Page Design**: Create a "Wow" factor hero section (Glassmorphism, gradients, animations).
+- [ ] **UI Components**: Install Shadcn `Button`, `Dialog`, `Input`, `Label`, `Tabs`.
+- [ ] **Responsiveness**: Ensure mobile-friendly layout.
 
 ---
 
