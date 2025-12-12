@@ -37,17 +37,17 @@
 *Objective: Build the visual shell and user identity layer with a premium Landing Page.*
 
 **🔥 Priority Tasks (Functional)**
-- [ ] **Authentication Backend**: Set up JWT logic on the server.
-- [ ] **Auth Modal**: Implement Shadcn `Dialog` for Login/Signup (no separate pages).
+- [x] **Authentication Backend**: Set up JWT logic on the server.
+- [x] **Auth Modal**: Implement Shadcn `Dialog` for Login/Signup (no separate pages).
 
 **🚧 Middle Priority (Functional)**
 - [ ] **Dashboard Logic**: Redirect to dashboard after successful login.
 - [ ] **Protected Routes**: Create wrappers to secure meeting pages.
 
 **🎨 Non-Functional Tasks**
-- [ ] **Landing Page Design**: Create a "Wow" factor hero section (Glassmorphism, gradients, animations).
-- [ ] **UI Components**: Install Shadcn `Button`, `Dialog`, `Input`, `Label`, `Tabs`.
-- [ ] **Responsiveness**: Ensure mobile-friendly layout.
+- [x] **Landing Page Design**: Create a "Wow" factor hero section (Glassmorphism, gradients, animations).
+- [x] **UI Components**: Install Shadcn `Button`, `Dialog`, `Input`, `Label`, `Tabs`.
+- [x] **Responsiveness**: Ensure mobile-friendly layout.
 
 ---
 

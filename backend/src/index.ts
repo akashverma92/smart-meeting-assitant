@@ -3,14 +3,17 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { Server } from "socket.io";
 import http from "http";
+import authRoutes from "./routes/auth.routes";
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
