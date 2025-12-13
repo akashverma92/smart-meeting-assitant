@@ -1,0 +1,1 @@
+// centeralized CORS configuration and secuirty headers config || controls wich frontend origins can access bacekdn

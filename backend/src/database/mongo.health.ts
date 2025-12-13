@@ -1,0 +1,1 @@
+// check MongoDB connection health status for monitoring purposes

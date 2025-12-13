@@ -1,0 +1,1 @@
+// Loads and validates environment variables for the application && ensures required env vars exist at startup
