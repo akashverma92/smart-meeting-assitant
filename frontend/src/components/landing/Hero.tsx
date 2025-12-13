@@ -3,7 +3,7 @@
 "use client";
 
 
-import AuthDialog from "@/src/components/landing/Dialog";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -28,7 +28,9 @@ export default function Hero() {
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4 items-center">
-        <AuthDialog />
+        <Link href="/auth/login" className="px-8 py-3 rounded-md text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-105">
+          Get Started
+        </Link>
         <button className="px-8 py-3 rounded-md text-sm font-medium text-gray-300 hover:text-white border border-white/10 hover:bg-white/5 transition-all">
           View API Docs
         </button>

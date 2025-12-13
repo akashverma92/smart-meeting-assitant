@@ -6,6 +6,7 @@ import { Label } from "@/src/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -42,6 +43,17 @@ export default function LoginForm() {
         <Button className="w-full" onClick={handleSubmit} disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+
+        <GoogleLoginButton />
       </CardContent>
     </Card>
   );
