@@ -1,0 +1,1 @@
+//Defines auth-related API routes for Login, registration, oath, callbacks
