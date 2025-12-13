@@ -19,8 +19,8 @@ router.get(
   passport.authenticate("google", { session: false }),
   (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const token = signToken((req.user as any)._id);
-    res.redirect(`http://localhost:3002/dashboard?token=${token}`);
+    const { token } = req.user as any;
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3002"}/dashboard?token=${token}`);
   }
 );
 
