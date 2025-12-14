@@ -2,6 +2,12 @@ import bcrypt from "bcryptjs";
 import { AuthRepository } from "./auth.repository";
 import { signToken } from "../../utils/jwt";
 
+const sanitizeUser = (user: any) => {
+  const obj = user.toObject ? user.toObject() : { ...user };
+  delete obj.password;
+  return obj;
+};
+
 export const AuthService = {
   async register(username: string, email: string, password: string) {
     const exists = await AuthRepository.findByEmail(email);
@@ -17,7 +23,8 @@ export const AuthService = {
     });
 
     const token = signToken({ userId: user._id });
-    return { user, token };
+
+    return { user: sanitizeUser(user), token };
   },
 
   async login(email: string, password: string) {
@@ -28,7 +35,8 @@ export const AuthService = {
     if (!valid) throw new Error("Invalid credentials");
 
     const token = signToken({ userId: user._id });
-    return { user, token };
+
+    return { user: sanitizeUser(user), token };
   },
 
   async googleLogin(profile: {
@@ -49,6 +57,6 @@ export const AuthService = {
     }
 
     const token = signToken({ userId: user._id });
-    return { user, token };
+    return { user: sanitizeUser(user), token };
   },
 };
