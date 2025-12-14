@@ -15,7 +15,7 @@ const UserSchema = new Schema<IUser>(
   {
     username: { type: String, required: true },
     email: { type: String, unique: true, required: true, lowercase: true },
-    password: { type: String },
+    password: { type: String}, // the password are not required as google auth users won't have it
     authProvider: { type: String, enum: ["email", "google"], required: true },
     avatarUrl: { type: String },
     isEmailVerified: { type: Boolean, default: false },

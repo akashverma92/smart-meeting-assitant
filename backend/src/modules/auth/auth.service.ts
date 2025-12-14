@@ -17,7 +17,6 @@ export const AuthService = {
     });
 
     const token = signToken({ userId: user._id });
-
     return { user, token };
   },
 
