@@ -20,7 +20,7 @@ router.get(
   (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { token } = req.user as any;
-    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3002"}/dashboard?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard?token=${token}`);
   }
 );
 
