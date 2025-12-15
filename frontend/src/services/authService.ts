@@ -1,54 +1,20 @@
-import { User } from "@/src/types/user";
+import { api } from "../lib/axiosClient";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+interface LoginData {
+  email: string;
+  password: string;
+}
 
-export interface AuthResponse {
-  user: User;
-  token: string;
+interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
 }
 
 export const authService = {
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!res.ok) throw new Error("Login failed");
-    return res.json();
-  },
-
-  async register(name: string, email: string, password: string): Promise<AuthResponse> {
-    const res = await fetch(`${API_BASE}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: name, email, password }),
-    });
-
-    if (!res.ok) throw new Error("Registration failed");
-    return res.json();
-  },
-
-  async googleLogin(token: string): Promise<AuthResponse> {
-    const res = await fetch(`${API_BASE}/auth/google`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-
-    if (!res.ok) throw new Error("Google login failed");
-    return res.json();
-  },
-
-  async getMe(token: string): Promise<User> {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) throw new Error("Unauthorized");
-    return res.json();
-  },
+  login: (data: LoginData) => api.post("/auth/v1/login", data),
+  register: (data: RegisterData) => api.post("/auth/v1/register", data),
+  me: () => api.get("/auth/v1/me"),
+  logout: () => api.post("/auth/v1/logout"),
+  googleAuthUrl: () => `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/v1/google`,
 };
