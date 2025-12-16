@@ -6,6 +6,8 @@ import { authService } from "@/src/services/authService";
 export default function GoogleLoginButton() {
     const handleGoogleLogin = () => {
         // Redirect to backend Google Auth route
+        const url = authService.googleAuthUrl();
+        console.log("Google Auth URL:", url);
         window.location.href = authService.googleAuthUrl();
     };
 

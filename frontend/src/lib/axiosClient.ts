@@ -3,7 +3,10 @@ import axios from "axios";
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`, // all endpoints start with /api
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL !== "undefined"
+      ? `${process.env.NEXT_PUBLIC_API_URL}/api`
+      : "http://localhost:3001/api",
   withCredentials: true, // send cookies with requests
 });
 // Optional: interceptors for logging / errors
