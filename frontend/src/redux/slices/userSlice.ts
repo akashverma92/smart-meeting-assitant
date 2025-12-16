@@ -15,6 +15,9 @@ export const loginUser = createAsyncThunk(
   async (data: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await authService.login(data);
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
       return res.data.user;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -27,6 +30,9 @@ export const registerUser = createAsyncThunk(
   async (data: { username: string; email: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await authService.register(data);
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
       return res.data.user;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
