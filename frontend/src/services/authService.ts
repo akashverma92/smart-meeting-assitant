@@ -16,5 +16,5 @@ export const authService = {
   register: (data: RegisterData) => api.post("/auth/v1/register", data),
   me: () => api.get("/auth/v1/me"),
   logout: () => api.post("/auth/v1/logout"),
-  googleAuthUrl: () => `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/v1/google`,
+  googleAuthUrl: () => `${process.env.NEXT_PUBLIC_API_URL}/api/auth/v1/google`,
 };

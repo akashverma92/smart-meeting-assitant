@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@/src/components/ui/button";
+import { authService } from "@/src/services/authService";
 
 export default function GoogleLoginButton() {
     const handleGoogleLogin = () => {
         // Redirect to backend Google Auth route
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
-        window.location.href = `${API_BASE}/auth/google`;
+        window.location.href = authService.googleAuthUrl();
     };
 
     return (
