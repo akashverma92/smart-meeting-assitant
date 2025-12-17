@@ -7,6 +7,7 @@ export interface IUser extends Document {
   authProvider: "email" | "google";
   avatarUrl?: string;
   isEmailVerified: boolean;
+  refreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,6 +20,7 @@ const UserSchema = new Schema<IUser>(
     authProvider: { type: String, enum: ["email", "google"], required: true },
     avatarUrl: { type: String },
     isEmailVerified: { type: Boolean, default: false },
+    refreshToken: { type: String, required:true },
   },
   { timestamps: true }
 );
