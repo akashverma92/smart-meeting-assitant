@@ -2,13 +2,14 @@ import { Router } from "express";
 import passport from "passport";
 import { AuthController } from "./auth.controller";
 import { requireAuth } from "../../middlewares/auth.middleware";
-import { setAuthCookie } from "../../utils/auth-cookie";
+import { setAccessTokenCookie } from "../../utils/auth-cookie";
+
 import { authRateLimiter } from "../../middlewares/rateLimit.middleware";
 
 const router = Router();
 
-router.post("/register",authRateLimiter, AuthController.register);
-router.post("/login",authRateLimiter, AuthController.login);
+router.post("/register", authRateLimiter, AuthController.register);
+router.post("/login", authRateLimiter, AuthController.login);
 router.post("/logout", AuthController.logout);
 router.get("/me", requireAuth, AuthController.me);
 
@@ -23,7 +24,7 @@ router.get(
   (req, res) => {
     // @ts-ignore
     const { token } = req.user;
-    setAuthCookie(res, token);
+    setAccessTokenCookie(res, token);
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 );

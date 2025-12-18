@@ -1,7 +1,14 @@
 import bcrypt from "bcryptjs";
 import { AuthRepository } from "./auth.repository";
-import { signToken } from "../../utils/jwt";
+import {
+  signAccessToken,
+  signRefreshToken,
+} from "../../utils/jwt";
+import { RefreshTokenModel } from "./auth.schema";
 
+/**
+ * Remove sensitive fields before returning user
+ */
 const sanitizeUser = (user: any) => {
   const obj = user.toObject ? user.toObject() : { ...user };
   delete obj.password;
@@ -9,6 +16,9 @@ const sanitizeUser = (user: any) => {
 };
 
 export const AuthService = {
+  /**
+   * Email + Password Registration
+   */
   async register(username: string, email: string, password: string) {
     const exists = await AuthRepository.findByEmail(email);
     if (exists) throw new Error("Email already registered");
@@ -20,13 +30,35 @@ export const AuthService = {
       email,
       password: hashed,
       authProvider: "email",
+      isEmailVerified: false,
     });
 
-    const token = signToken({ userId: user._id });
+    const accessToken = signAccessToken({
+      userId: user._id.toString(),
+    });
 
-    return { user: sanitizeUser(user), token };
+    const refreshToken = signRefreshToken({
+      userId: user._id.toString(),
+    });
+
+    await RefreshTokenModel.create({
+      user: user._id,
+      token: refreshToken,
+      expiresAt: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
+      ),
+    });
+
+    return {
+      user: sanitizeUser(user),
+      accessToken,
+      refreshToken,
+    };
   },
 
+  /**
+   * Email + Password Login
+   */
   async login(email: string, password: string) {
     const user = await AuthRepository.findByEmail(email);
     if (!user || !user.password) throw new Error("Invalid credentials");
@@ -34,11 +66,32 @@ export const AuthService = {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new Error("Invalid credentials");
 
-    const token = signToken({ userId: user._id });
+    const accessToken = signAccessToken({
+      userId: user._id.toString(),
+    });
 
-    return { user: sanitizeUser(user), token };
+    const refreshToken = signRefreshToken({
+      userId: user._id.toString(),
+    });
+
+    await RefreshTokenModel.create({
+      user: user._id,
+      token: refreshToken,
+      expiresAt: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ),
+    });
+
+    return {
+      user: sanitizeUser(user),
+      accessToken,
+      refreshToken,
+    };
   },
 
+  /**
+   * Google OAuth Login
+   */
   async googleLogin(profile: {
     email: string;
     name: string;
@@ -56,7 +109,26 @@ export const AuthService = {
       });
     }
 
-    const token = signToken({ userId: user._id });
-    return { user: sanitizeUser(user), token };
+    const accessToken = signAccessToken({
+      userId: user._id.toString(),
+    });
+
+    const refreshToken = signRefreshToken({
+      userId: user._id.toString(),
+    });
+
+    await RefreshTokenModel.create({
+      user: user._id,
+      token: refreshToken,
+      expiresAt: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ),
+    });
+
+    return {
+      user: sanitizeUser(user),
+      accessToken,
+      refreshToken,
+    };
   },
 };
