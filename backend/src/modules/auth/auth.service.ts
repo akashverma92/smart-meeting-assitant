@@ -3,8 +3,10 @@ import { AuthRepository } from "./auth.repository";
 import {
   signAccessToken,
   signRefreshToken,
+  verifyRefreshToken,
 } from "../../utils/jwt";
 import { RefreshTokenModel } from "./auth.schema";
+import { RefreshTokenRepository } from "./refreshToken.repository";
 
 /**
  * Remove sensitive fields before returning user
@@ -131,4 +133,39 @@ export const AuthService = {
       refreshToken,
     };
   },
+  async refresh(refreshToken: string) {
+    // 1. Verify refresh token JWT
+    const payload = verifyRefreshToken(refreshToken);
+
+    // 2. Check token in DB
+    const storedToken = await RefreshTokenRepository.findValid(refreshToken);
+    if (!storedToken) {
+      throw new Error("Invalid refresh token");
+    }
+
+    // 3. Revoke old refresh token (rotation)
+    await RefreshTokenRepository.revoke(refreshToken);
+
+    // 4. Issue new tokens
+    const newAccessToken = signAccessToken({
+      userId: payload.userId,
+    });
+
+    const newRefreshToken = signRefreshToken({
+      userId: payload.userId,
+    });
+
+    // 5. Store new refresh token
+    await RefreshTokenRepository.create(
+      payload.userId,
+      newRefreshToken,
+      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    );
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    };
+  },
+
 };

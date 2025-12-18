@@ -39,6 +39,24 @@ export const AuthController = {
     res.json({ user });
   }) as RequestHandler,
 
+  // refersh token handled in refreshToken.controller.ts
+  refresh: (async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await AuthService.refresh(refreshToken);
+
+    setAccessTokenCookie(res, accessToken);
+    setRefreshTokenCookie(res, newRefreshToken);
+
+    res.status(200).json({ message: "Token refreshed" });
+  }) as RequestHandler,
+
+
   /**
    * CURRENT USER
    */
