@@ -22,9 +22,8 @@ export const useAuth = () => {
   };
 
   const logoutUser = () => {
-    localStorage.removeItem("token");
     dispatch(logout());
-    router.push("/");
+    router.push("/login"); // redirect to login page
   };
 
   return { login, register, logoutUser };

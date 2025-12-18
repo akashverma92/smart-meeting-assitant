@@ -1,21 +1,12 @@
+// D:\smart-meeting-assistant\frontend\src\services\authService.ts
 import { api } from "../lib/axiosClient";
 
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  username: string;
-  email: string;
-  password: string;
-}
-
 export const authService = {
-  login: (data: LoginData) => api.post("/auth/v1/login", data),
-  register: (data: RegisterData) => api.post("/auth/v1/register", data),
+  login: (data: { email: string; password: string }) => api.post("/auth/v1/login", data),
+  register: (data: { username: string; email: string; password: string }) => api.post("/auth/v1/register", data),
   me: () => api.get("/auth/v1/me"),
   logout: () => api.post("/auth/v1/logout"),
+  refresh: () => api.post("/auth/v1/refresh"), // 🔹 refresh token endpoint
   googleAuthUrl: () => {
     const baseUrl =
       process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL !== "undefined"
