@@ -40,3 +40,6 @@ coverage/
 
 # Cache folders
 .cache/
+
+# script file
+scripts/
