@@ -1,0 +1,1 @@
+// Allowed state transitions for meetings
