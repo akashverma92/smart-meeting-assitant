@@ -11,6 +11,6 @@ router.use("/auth/v1", authRoutes);
 router.use("/system/v1", systemRoutes);
 
 router.use("/meetings/v1", meetingRoutes);
-router.use("/resumes/v1", resumeRoutes);
+router.use("/meetings/v1", resumeRoutes);
 
 export default router;

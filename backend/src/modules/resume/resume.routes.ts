@@ -8,10 +8,12 @@ const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post(
-  "/meetings/:meetingId/resume",
+  "/:meetingId/resume",
   authMiddleware,
   upload.single("resume"),
   ResumeController.upload
 );
 
 export default router;
+
+
