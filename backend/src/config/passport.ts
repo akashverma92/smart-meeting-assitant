@@ -26,7 +26,7 @@ passport.use(
           avatarUrl: avatar,
         });
 
-        done(null, data);
+        done(null, data as any);
       } catch (err) {
         done(err, false);
       }

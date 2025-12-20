@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 import helmet from "helmet";
 import "./config/passport";
+import "./types/express-augment";
 import { corsMiddleware } from "./config/cors";
 import routes from "./routes";
 
