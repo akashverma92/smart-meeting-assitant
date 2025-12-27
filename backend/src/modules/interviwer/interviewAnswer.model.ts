@@ -26,12 +26,25 @@ const InterviewAnswerSchema = new Schema(
       required: true,
     },
 
-    score: {
+    aiScore: {
       type: Number,
-      default: null, // for future AI scoring
+      min: 0,
+      max: 10,
+      default: null,
     },
 
     feedback: {
+      type: String,
+      default: null,
+    },
+        humanScore: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: null,
+    },
+
+    humanFeedback: {
       type: String,
       default: null,
     },
