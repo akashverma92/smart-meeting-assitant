@@ -8,6 +8,7 @@ import resumeRoutes from "./modules/resume/resume.routes";
 import interviewerRoutes from "./modules/interviwer/interviewer.routes";
 import interviewAnswerRoutes from "./modules/interviwer/interviewanswer.routes";
 import interviewerEvaluationRoutes from "./modules/interviwer/interviewerEvaluation.routes";
+import interviewResultRoutes from "./modules/interview-result/interviewResult.routes";
 const router = Router();
 
 router.use("/auth/v1", authRoutes);
@@ -18,5 +19,6 @@ router.use("/meetings/v1", resumeRoutes);
 router.use("/interviewer/v1", interviewerRoutes);
 router.use("/interviewer/v1", interviewAnswerRoutes);
 router.use("/interviewer/v1", interviewerEvaluationRoutes);
+router.use("/interviewer/v1", interviewResultRoutes);
 
 export default router;
