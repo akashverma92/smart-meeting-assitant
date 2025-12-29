@@ -51,4 +51,10 @@ export class AIContextService {
       stage
     );
   }
+  static async setCurrentQuestion(meetingId: string, question: string) {
+  return AIContextRepository.update(meetingId, {
+    currentQuestion: question,
+  });
+}
+
 }
