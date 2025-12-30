@@ -18,7 +18,8 @@ export const loginUser = createAsyncThunk(
 
       return res.data.user;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      // Return the full error data so the UI helper can parse it
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
@@ -31,7 +32,8 @@ export const registerUser = createAsyncThunk(
 
       return res.data.user;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+      // Return the full error data so the UI helper can parse it
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
@@ -41,7 +43,7 @@ export const fetchMe = createAsyncThunk("user/me", async (_, { rejectWithValue }
     const res = await authService.me();
     return res.data;
   } catch (err: any) {
-    return rejectWithValue(err.response?.data?.message || err.message);
+    return rejectWithValue(err.response?.data || err.message);
   }
 });
 

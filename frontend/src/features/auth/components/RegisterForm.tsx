@@ -8,9 +8,14 @@ import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import GoogleLoginButton from "./GoogleLoginButton";
 import { Eye, EyeOff } from "lucide-react";
+import { useSelector } from "react-redux";
+import { getErrorMessage } from "@/src/utils/errorResponse";
+import { RootState } from "@/src/redux/store";
 
 export default function RegisterForm() {
   const { register } = useAuth();
+  const { error: authError } = useSelector((state: RootState) => state.user);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,12 +26,34 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const validatePassword = (pwd: string) => {
+    if (pwd.length < 8) return "Password must be at least 8 characters long";
+    if (!/[a-z]/.test(pwd)) return "Password must contain at least one lowercase letter";
+    if (!/[A-Z]/.test(pwd)) return "Password must contain at least one uppercase letter";
+    if (!/[0-9]/.test(pwd)) return "Password must contain at least one number";
+    if (!/[\W_]/.test(pwd)) return "Password must contain at least one special character";
+    return null;
+  };
+
   const handleSubmit = async () => {
     setError("");
+
+    if (!name || !email || !password || !confirmPassword) {
+      setError("All fields are required");
+      return;
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
+
     setLoading(true);
     try {
       await register(name, email, password);
@@ -112,10 +139,14 @@ export default function RegisterForm() {
           </div>
         </div>
 
-        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+        {(error || authError) && (
+          <p className="text-red-400 text-sm text-center bg-red-500/10 p-2 rounded border border-red-500/20">
+            {getErrorMessage(error || authError)}
+          </p>
+        )}
 
         <Button
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleSubmit}
           disabled={loading}
         >
