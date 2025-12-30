@@ -12,7 +12,7 @@ export default function GoogleLoginButton() {
     };
 
     return (
-        <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
+        <Button className="w-full bg-white text-black hover:bg-gray-200 border-none" onClick={handleGoogleLogin}>
             <svg
                 className="mr-2 h-4 w-4"
                 aria-hidden="true"

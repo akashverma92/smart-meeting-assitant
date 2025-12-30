@@ -13,7 +13,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-black text-white selection:bg-blue-500/30 relative">
       <BackgroundAnimation />
 
-      <main className="relative z-10 flex flex-col items-center justify-center px-4 pt-20 pb-32 text-center sm:pt-32">
+      <main className="relative z-10 flex flex-col items-center justify-center px-4 pt-12 pb-32 text-center sm:pt-24">
         <Hero />
         <FeatureCards />
       </main>

@@ -1,6 +1,5 @@
 // D:\smart-meeting-assistant\frontend\src\lib\axiosClient.ts
 import axios from "axios";
-import { authService } from "../services/authService";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -47,7 +46,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await authService.refresh(); // Call your refresh endpoint
+        await api.post("/auth/v1/refresh"); // Call refresh endpoint directly
         isRefreshing = false;
         processQueue(null, null);
         return api(originalRequest);
