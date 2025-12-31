@@ -1,26 +1,42 @@
 export const getErrorMessage = (error: any): string => {
-    if (typeof error === "string") return error;
-
-    if (Array.isArray(error)) {
-        // Check if it's the specific format provided by the user (Zod/backend validation array)
-        // Example: [ { "message": "Invalid email address", ... } ]
-        const firstError = error[0];
-        if (firstError && typeof firstError === "object" && firstError.message) {
-            return firstError.message;
+    // 1. Handle String Input
+    if (typeof error === "string") {
+        try {
+            // Attempt to parse stringified JSON (common from some backend framework responses like Fastify/Zod)
+            const parsed = JSON.parse(error);
+            if (parsed && (typeof parsed === "object" || Array.isArray(parsed))) {
+                return getErrorMessage(parsed);
+            }
+        } catch {
+            // Not a JSON string, return as is
+            return error;
         }
-        // Fallback if array contains strings
-        if (typeof firstError === "string") {
-            return firstError;
+        return error;
+    }
+
+    // 2. Handle Array (e.g., Zod validation errors, backend validation lists)
+    if (Array.isArray(error)) {
+        const firstError = error[0];
+        if (firstError) {
+            if (typeof firstError === "object" && firstError.message) {
+                return firstError.message;
+            }
+            if (typeof firstError === "string") {
+                return firstError;
+            }
         }
     }
 
-    // Handle object likely response.data
+    // 3. Handle Object
     if (error && typeof error === "object") {
+        // Standard error.message
         if (error.message) return error.message;
-        // Check nested errors property often used in APIs
-        if (error.errors && Array.isArray(error.errors)) {
-            return getErrorMessage(error.errors);
-        }
+
+        // Nested 'errors' array or object
+        if (error.errors) return getErrorMessage(error.errors);
+
+        // Sometimes backend returns { error: "Message" }
+        if (error.error) return typeof error.error === "string" ? error.error : getErrorMessage(error.error);
     }
 
     return "An unexpected error occurred.";

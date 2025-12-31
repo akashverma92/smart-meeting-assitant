@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from '@/src/components/ui/card';
-import { Video, Link as LinkIcon, Bot, History } from 'lucide-react';
+import { Link as LinkIcon, Bot, History, FileText } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 interface ActionCardProps {
@@ -37,10 +37,10 @@ export const ActionCards = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <ActionCard
-                icon={Video}
-                title="Start Meeting"
-                description="Create a new instant meeting"
-                colorClass="text-blue-600 dark:text-blue-400"
+                icon={Bot}
+                title="AI Interview"
+                description="Practice with AI interviewer"
+                colorClass="text-primary hover:text-primary/80"
             />
             <ActionCard
                 icon={LinkIcon}
@@ -49,16 +49,16 @@ export const ActionCards = () => {
                 colorClass="text-purple-600 dark:text-purple-400"
             />
             <ActionCard
-                icon={Bot}
-                title="AI Interview"
-                description="Practice with AI interviewer"
-                colorClass="text-indigo-600 dark:text-indigo-400"
-            />
-            <ActionCard
                 icon={History}
                 title="History"
                 description="View past meetings"
                 colorClass="text-amber-600 dark:text-amber-400"
+            />
+            <ActionCard
+                icon={FileText}
+                title="Result"
+                description="View interview results"
+                colorClass="text-emerald-600 dark:text-emerald-400"
             />
         </div>
     );

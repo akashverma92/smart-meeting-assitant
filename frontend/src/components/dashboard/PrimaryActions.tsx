@@ -10,7 +10,7 @@ export const PrimaryActions = () => {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
             >
                 <Video className="mr-2 h-5 w-5" />
-                Start Meeting
+                start 
             </Button>
 
             <Button

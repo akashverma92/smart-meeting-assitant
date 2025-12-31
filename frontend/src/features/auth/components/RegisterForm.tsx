@@ -35,11 +35,21 @@ export default function RegisterForm() {
     return null;
   };
 
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   const handleSubmit = async () => {
     setError("");
 
     if (!name || !email || !password || !confirmPassword) {
       setError("All fields are required");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Invalid email address");
       return;
     }
 
