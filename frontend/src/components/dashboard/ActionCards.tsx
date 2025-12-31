@@ -1,4 +1,7 @@
+"use client";
+
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/src/components/ui/card';
 import { Link as LinkIcon, Bot, History, FileText } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
@@ -34,6 +37,8 @@ const ActionCard = ({ icon: Icon, title, description, colorClass, onClick }: Act
 );
 
 export const ActionCards = () => {
+    const router = useRouter();
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <ActionCard
@@ -41,6 +46,7 @@ export const ActionCards = () => {
                 title="AI Interview"
                 description="Practice with AI interviewer"
                 colorClass="text-primary hover:text-primary/80"
+                onClick={() => router.push('/interviewer')}
             />
             <ActionCard
                 icon={LinkIcon}
