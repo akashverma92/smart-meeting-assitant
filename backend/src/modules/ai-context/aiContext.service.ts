@@ -20,6 +20,7 @@ export class AIContextService {
 
   /**
    * 🔹 Called after resume is uploaded & analyzed
+   * NOTE: Does NOT change stage - stage transitions happen in interviewer.service
    */
   static async enrichWithResume({
     meetingId,
@@ -33,7 +34,8 @@ export class AIContextService {
     return AIContextRepository.update(meetingId, {
       resumeId,
       skills,
-      stage: InterviewStage.RESUME_BASED,
+      // ❌ Don't change stage here - let the interview flow naturally
+      // Stage will transition to RESUME_BASED after intro questions are done
     });
   }
 
@@ -52,9 +54,9 @@ export class AIContextService {
     );
   }
   static async setCurrentQuestion(meetingId: string, question: string) {
-  return AIContextRepository.update(meetingId, {
-    currentQuestion: question,
-  });
-}
+    return AIContextRepository.update(meetingId, {
+      currentQuestion: question,
+    });
+  }
 
 }

@@ -28,6 +28,11 @@ export class InterviewAnswerService {
       aiFeedback: evaluation.feedback,
     });
 
+    // 3️⃣ Clear current question so next question can be fetched
+    await AIContextRepository.update(meetingId, {
+      currentQuestion: null,
+    });
+
     return record;
   }
 }

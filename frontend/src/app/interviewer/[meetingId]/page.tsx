@@ -36,9 +36,15 @@ export default function InterviewRoomPage() {
         scrollToBottom();
     }, [messages, isTyping]);
 
+    // Prevent double fetch in strict mode
+    const initialFetchDone = useRef(false);
+
     // Fetch first question on mount
     useEffect(() => {
-        fetchNextQuestion();
+        if (!initialFetchDone.current) {
+            initialFetchDone.current = true;
+            fetchNextQuestion();
+        }
     }, []);
 
     const fetchNextQuestion = async () => {
@@ -53,14 +59,20 @@ export default function InterviewRoomPage() {
             const response = await interviewService.getNextQuestion(meetingId);
             const question = response.data.question;
 
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: "ai",
-                    content: question,
-                    timestamp: new Date(),
-                },
-            ]);
+            setMessages((prev) => {
+                const lastMsg = prev[prev.length - 1];
+                if (lastMsg && lastMsg.role === "ai" && lastMsg.content === question) {
+                    return prev;
+                }
+                return [
+                    ...prev,
+                    {
+                        role: "ai",
+                        content: question,
+                        timestamp: new Date(),
+                    },
+                ];
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to fetch question");
         } finally {
@@ -96,14 +108,20 @@ export default function InterviewRoomPage() {
             const response = await interviewService.getNextQuestion(meetingId);
             const question = response.data.question;
 
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: "ai",
-                    content: question,
-                    timestamp: new Date(),
-                },
-            ]);
+            setMessages((prev) => {
+                const lastMsg = prev[prev.length - 1];
+                if (lastMsg && lastMsg.role === "ai" && lastMsg.content === question) {
+                    return prev;
+                }
+                return [
+                    ...prev,
+                    {
+                        role: "ai",
+                        content: question,
+                        timestamp: new Date(),
+                    },
+                ];
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to submit answer");
         } finally {
@@ -188,8 +206,8 @@ export default function InterviewRoomPage() {
 
                                 <div
                                     className={`max-w-[75%] rounded-2xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl ${message.role === "ai"
-                                            ? "bg-gradient-to-br from-muted/80 to-muted/50 border border-border/50"
-                                            : "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground"
+                                        ? "bg-gradient-to-br from-muted/80 to-muted/50 border border-border/50"
+                                        : "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground"
                                         }`}
                                 >
                                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>

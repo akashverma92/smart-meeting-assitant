@@ -77,20 +77,81 @@ export class ResumeService {
     meeting.state = MeetingState.RESUME_ANALYZED;
     await meeting.save();
 
+    // 🧠 Enrich AI context with resume data
+    const { AIContextService } = await import("../ai-context/aiContext.service");
+    await AIContextService.enrichWithResume({
+      meetingId: meetingId,
+      resumeId: resume._id.toString(),
+      skills: parsedData.skills,
+    });
+
     return resume;
   }
 
   // 🔍 Basic keyword extraction (Phase-1 safe)
   private static extractSkills(text: string): string[] {
     const keywords = [
+      // Frontend
       "javascript",
       "typescript",
       "react",
+      "vue",
+      "angular",
+      "next.js",
+      "nextjs",
+      "html",
+      "css",
+      "tailwind",
+      "bootstrap",
+
+      // Backend
       "node",
-      "mongodb",
+      "nodejs",
+      "express",
+      "nestjs",
       "python",
+      "django",
+      "flask",
       "java",
+      "spring",
+      "c#",
+      "dotnet",
+      ".net",
+      "php",
+      "laravel",
+      "ruby",
+      "rails",
+      "go",
+      "golang",
+
+      // Databases
+      "mongodb",
       "sql",
+      "mysql",
+      "postgresql",
+      "postgres",
+      "redis",
+      "dynamodb",
+      "firebase",
+
+      // Cloud & DevOps
+      "aws",
+      "azure",
+      "gcp",
+      "docker",
+      "kubernetes",
+      "jenkins",
+      "git",
+      "github",
+      "gitlab",
+
+      // Other
+      "graphql",
+      "rest",
+      "api",
+      "microservices",
+      "agile",
+      "scrum",
     ];
 
     return keywords.filter((k) =>
