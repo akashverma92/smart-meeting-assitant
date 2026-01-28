@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
@@ -15,6 +15,19 @@ export default function InterviewerPage() {
     const [meetingId, setMeetingId] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // 🗣️ Speak welcome message
+    useEffect(() => {
+        const welcomeText = "Welcome! To begin your interview, please upload your resume.";
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(welcomeText);
+            // Optional: Select a better voice
+            // const voices = window.speechSynthesis.getVoices();
+            // utterance.voice = voices.find(v => v.lang.includes('en')) || null;
+            window.speechSynthesis.cancel(); // specific safety
+            window.speechSynthesis.speak(utterance);
+        }
+    }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {

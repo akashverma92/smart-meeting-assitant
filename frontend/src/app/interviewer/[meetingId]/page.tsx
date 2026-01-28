@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/ca
 import { Button } from "@/src/components/ui/button";
 import { Textarea } from "@/src/components/ui/textarea";
 import { interviewService } from "@/src/services/interviewService";
-import { Loader2, Send, Bot, User, LogOut, Sparkles, MessageSquare } from "lucide-react";
+import { Loader2, Send, Bot, User, LogOut, Sparkles, MessageSquare, Volume2, VolumeX, Mic, MicOff } from "lucide-react";
 
 interface Message {
     role: "ai" | "user";
@@ -28,10 +28,119 @@ export default function InterviewRoomPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
+    const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef<any>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
     // Auto-scroll to bottom when new messages arrive
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    // 🗣️ Text-to-Speech Helper
+    const speakText = (text: string) => {
+        if (!isAudioEnabled || typeof window === 'undefined') return;
+
+        // Cancel previous speech/timers
+        window.speechSynthesis.cancel();
+        if (timerRef.current) clearTimeout(timerRef.current);
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // When speech ends, start listening
+        utterance.onend = () => {
+            console.log("Speech ended. Starting listener...");
+            startListening();
+        };
+
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // Trigger Speech when AI message arrives
+    useEffect(() => {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.role === "ai") {
+            speakText(lastMsg.content);
+        }
+    }, [messages]);
+
+    // Initialize Speech Recognition
+    const startListening = () => {
+        if (typeof window === 'undefined' || !('webkitSpeechRecognition' in window)) {
+            console.warn("Speech recognition not supported");
+            // Fallback or just ignore
+            return;
+        }
+
+        // Stop any existing instance
+        if (recognitionRef.current) recognitionRef.current.stop();
+
+        const recognition = new (window as any).webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            setIsListening(true);
+            // We DON'T clear the 8s timer here. 
+            // We wait for actual speech (onresult) to confirm active participation.
+            // If user stays silent, the 8s timer will fire and skip.
+        };
+
+        recognition.onresult = (event: any) => {
+            // Speech detected! NOW we clear the "No Speech" 8s timer
+            if (timerRef.current) clearTimeout(timerRef.current);
+
+            const transcript = Array.from(event.results)
+                .map((result: any) => result[0])
+                .map((result) => result.transcript)
+                .join('');
+
+            setCurrentAnswer(transcript);
+
+            // Silence Detection: Submits 3 seconds after speech stops
+            timerRef.current = setTimeout(() => {
+                console.log("Silence detected (3s). Stopping & submitting...");
+                recognition.stop();
+                // Rely on useEffect monitoring !isListening to submit
+            }, 3000);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+            // Logic handled by useEffect below
+        };
+
+        recognitionRef.current = recognition;
+        recognition.start();
+
+        // ⏱️ Patiently wait 8 seconds for the user to START speaking
+        // If no speech detected by then, we auto-skipping.
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+            console.log("No speech detected for 8 seconds. Auto-skipping.");
+            recognition.stop();
+            handleSubmitAnswer("Pass (No response)");
+        }, 8000);
+    };
+
+    const stopListening = () => {
+        if (recognitionRef.current) recognitionRef.current.stop();
+        setIsListening(false);
+    };
+
+    // Auto-submit when listening stops and we have an answer
+    // We use a useEffect to monitor isListening toggling off
+    useEffect(() => {
+        if (!isListening && currentAnswer.trim().length > 0 && !loading) {
+            // Wait brief moment to ensure final transcript
+            const t = setTimeout(() => {
+                handleSubmitAnswer();
+            }, 500);
+            return () => clearTimeout(t);
+        }
+    }, [isListening]);
 
     useEffect(() => {
         scrollToBottom();
@@ -96,17 +205,23 @@ export default function InterviewRoomPage() {
         }
     };
 
-    const handleSubmitAnswer = async () => {
-        if (!currentAnswer.trim()) return;
+    const handleSubmitAnswer = async (forcedAnswer?: string) => {
+        const answerText = forcedAnswer || currentAnswer;
+        if (!answerText.trim()) return;
+
+        // Clear any running timers
+        if (timerRef.current) clearTimeout(timerRef.current);
+        // Stop speaking
+        window.speechSynthesis.cancel();
 
         const userMessage: Message = {
             role: "user",
-            content: currentAnswer,
+            content: answerText,
             timestamp: new Date(),
         };
 
         setMessages((prev) => [...prev, userMessage]);
-        const answerToSubmit = currentAnswer;
+        const answerToSubmit = answerText;
         setCurrentAnswer("");
         setLoading(true);
         setIsTyping(true);
@@ -194,6 +309,18 @@ export default function InterviewRoomPage() {
                                 <LogOut className="h-4 w-4" />
                                 End Interview
                             </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setIsAudioEnabled(!isAudioEnabled);
+                                    window.speechSynthesis.cancel();
+                                    if (timerRef.current) clearTimeout(timerRef.current);
+                                }}
+                                className="ml-2 gap-2"
+                            >
+                                {isAudioEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                            </Button>
                         </div>
                     </CardHeader>
                 </Card>
@@ -280,45 +407,63 @@ export default function InterviewRoomPage() {
                     </div>
                 )}
 
-                {/* Answer Input */}
-                <Card className="bg-card/80 backdrop-blur-xl border-border/50 shadow-xl">
-                    <CardContent className="p-4">
-                        <div className="flex gap-3">
-                            <Textarea
-                                value={currentAnswer}
-                                onChange={(e) => setCurrentAnswer(e.target.value)}
-                                placeholder={isFinished ? "Interview completed." : "Type your answer here... (Ctrl + Enter to submit)"}
-                                className="min-h-[120px] resize-none border-border/50 focus:border-primary/50 transition-colors bg-background/50"
+                {/* Voice Interaction Area */}
+                <Card className="bg-card/80 backdrop-blur-xl border-border/50 shadow-xl overflow-hidden">
+                    <CardContent className="p-8 flex flex-col items-center justify-center gap-6">
+
+                        {/* Mic Visualizer */}
+                        <div className={`relative flex items-center justify-center w-24 h-24 rounded-full transition-all duration-500 ${isListening ? "bg-red-500/10 scale-110" : "bg-primary/10"
+                            }`}>
+                            {isListening && (
+                                <>
+                                    <div className="absolute inset-0 rounded-full bg-red-500/20 animate-ping" />
+                                    <div className="absolute inset-0 rounded-full bg-red-500/10 animate-pulse delay-75" />
+                                </>
+                            )}
+
+                            <button
+                                onClick={isListening ? stopListening : startListening}
                                 disabled={loading || isFinished}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.ctrlKey) {
-                                        e.preventDefault();
-                                        handleSubmitAnswer();
-                                    }
-                                }}
-                            />
-                            <Button
-                                onClick={handleSubmitAnswer}
-                                disabled={loading || !currentAnswer.trim() || isFinished}
-                                className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 h-auto px-8 shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-50"
+                                className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${isListening
+                                    ? "bg-red-500 text-white shadow-red-500/50"
+                                    : "bg-primary text-white shadow-primary/50"
+                                    } shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                                {loading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <Send className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
-                                )}
-                            </Button>
+                                {isListening ? <Mic className="h-8 w-8 animate-pulse" /> : <MicOff className="h-8 w-8" />}
+                            </button>
                         </div>
-                        <div className="flex items-center justify-between mt-3">
-                            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                                <kbd className="px-2 py-0.5 rounded bg-muted text-xs">Ctrl</kbd>
-                                <span>+</span>
-                                <kbd className="px-2 py-0.5 rounded bg-muted text-xs">Enter</kbd>
-                                <span>to submit</span>
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                {currentAnswer.length} characters
-                            </p>
+
+                        {/* Status Text & Transcript */}
+                        <div className="text-center space-y-4 max-w-2xl w-full">
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-semibold">
+                                    {isListening ? "Listening..." : isFinished ? "Interview Completed" : "Waiting for response..."}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {isListening ? "Speak clearly now" : "Bot is speaking..."}
+                                </p>
+                            </div>
+
+                            {/* Live Transcript Preview */}
+                            {(currentAnswer || isListening) && (
+                                <div className="p-4 rounded-xl bg-background/50 border border-border/50 min-h-[80px] flex items-center justify-center text-center">
+                                    <p className="text-lg font-medium text-foreground/80 leading-relaxed">
+                                        {currentAnswer || <span className="text-muted-foreground/50 italic">Your answer will appear here...</span>}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Manual Controls (Backup) */}
+                            <div className="flex justify-center gap-3 pt-2">
+                                {/* Skip Button Removed for Professional Feel */}
+                                <Button
+                                    onClick={() => handleSubmitAnswer()}
+                                    disabled={loading || isFinished || !currentAnswer.trim()}
+                                    className="bg-primary hover:bg-primary/90 w-full max-w-xs"
+                                >
+                                    Done Speaking / Submit Early
+                                </Button>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
