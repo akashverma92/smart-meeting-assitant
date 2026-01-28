@@ -1,7 +1,7 @@
 // AI logic: prompt flow, response generation
 import { AIContextRepository } from "../ai-context/aiContext.repository";
 import { InterviewStage } from "../ai-context/aiContext.types";
-import { WARMUP_QUESTIONS } from "./interviewer.prompts";
+import { WARMUP_QUESTIONS, TECHNICAL_QUESTION_BANK, HR_QUESTIONS } from "./interviewer.prompts";
 
 export class InterviewerService {
   static async getNextQuestion(meetingId: string): Promise<{ question: string; stage: string } | null> {
@@ -45,60 +45,128 @@ export class InterviewerService {
       }
     }
 
-    // 2️⃣ Resume-based questions
+    // 2️⃣ Resume-based questions (Project)
     if (context.stage === InterviewStage.RESUME_BASED) {
       const askedTexts = new Set(context.askedQuestions?.map((q: any) => q.question) || []);
-
-      // Priority 1: Project-based question
       const projectQuestion = "Tell me about a project from your resume you are proud of.";
 
-      // Priority 2: Skill-based questions
-      // We limit to top 3 skills to avoid endless questioning in Phase 1
-      const skillQuestions = (context.skills || [])
-        .slice(0, 3)
-        .map((skill: string) =>
-          `I see you have listed ${skill} as a skill. Can you explain a specific challenge you faced while using it?`
+      // Only ask project question if not asked yet
+      if (!askedTexts.has(projectQuestion)) {
+        await AIContextRepository.pushAskedQuestion(
+          meetingId,
+          projectQuestion,
+          InterviewStage.RESUME_BASED
         );
 
-      const candidateQuestions = [projectQuestion, ...skillQuestions];
+        return {
+          question: projectQuestion,
+          stage: InterviewStage.RESUME_BASED,
+        };
+      } else {
+        // Project question asked -> Move to TECHNICAL
+        await AIContextRepository.update(meetingId, {
+          stage: InterviewStage.TECHNICAL,
+        });
 
-      const nextQuestion = candidateQuestions.find((q) => !askedTexts.has(q));
+        // Refresh context for next stage
+        return this.getNextQuestion(meetingId);
+      }
+    }
+
+    // 3️⃣ Technical Questions (Skill-based)
+    if (context.stage === InterviewStage.TECHNICAL) {
+      const askedTexts = new Set(context.askedQuestions?.map((q: any) => q.question) || []);
+      const skills = context.skills || [];
+
+      let nextQuestion = null;
+
+      // Try to find a question for each skill
+      for (const skill of skills) {
+        // Normalize skill to lower case to match bank keys
+        const normalizedSkill = skill.toLowerCase().trim();
+        // Simple fuzzy match or direct lookup
+        const bankKey = Object.keys(TECHNICAL_QUESTION_BANK).find(k => normalizedSkill.includes(k));
+
+        if (bankKey) {
+          const potentialQuestions = TECHNICAL_QUESTION_BANK[bankKey];
+          // Find one that hasn't been asked
+          const unasked = potentialQuestions.find(q => !askedTexts.has(q));
+          if (unasked) {
+            nextQuestion = unasked;
+            break; // Found a question, stop looking (one by one)
+          }
+        }
+      }
+
+      // If no skill-specific question found (or all specific ones asked), try default technical questions
+      if (!nextQuestion) {
+        const defaultQuestions = TECHNICAL_QUESTION_BANK['default'];
+        nextQuestion = defaultQuestions.find(q => !askedTexts.has(q));
+      }
 
       if (nextQuestion) {
         await AIContextRepository.pushAskedQuestion(
           meetingId,
           nextQuestion,
-          InterviewStage.RESUME_BASED
+          InterviewStage.TECHNICAL
         );
-
         return {
           question: nextQuestion,
-          stage: InterviewStage.RESUME_BASED,
+          stage: InterviewStage.TECHNICAL,
         };
       } else {
-        // Done with resume questions -> Move to WRAP_UP (or TECHNICAL if implemented)
+        // All technical questions covered -> Move to BEHAVIORAL
+        await AIContextRepository.update(meetingId, {
+          stage: InterviewStage.BEHAVIORAL,
+        });
+        return this.getNextQuestion(meetingId);
+      }
+    }
+
+    // 4️⃣ Behavioral (HR) Questions
+    if (context.stage === InterviewStage.BEHAVIORAL) {
+      const askedTexts = new Set(context.askedQuestions?.map((q: any) => q.question) || []);
+
+      // Pick first unasked HR question
+      const nextQuestion = HR_QUESTIONS.find(q => !askedTexts.has(q));
+
+      if (nextQuestion) {
+        await AIContextRepository.pushAskedQuestion(
+          meetingId,
+          nextQuestion,
+          InterviewStage.BEHAVIORAL
+        );
+        return {
+          question: nextQuestion,
+          stage: InterviewStage.BEHAVIORAL,
+        };
+      } else {
+        // Done with HR -> Move to WRAP_UP
         await AIContextRepository.update(meetingId, {
           stage: InterviewStage.WRAP_UP,
         });
+        return this.getNextQuestion(meetingId);
+      }
+    }
 
-        const closingQuestion = "That covers my questions on your background. Do you have any questions for me regarding the role or the team?";
+    // 5️⃣ Wrap-Up
+    if (context.stage === InterviewStage.WRAP_UP) {
+      const askedTexts = new Set(context.askedQuestions?.map((q: any) => q.question) || []);
+      const closingQuestion = "That covers my questions on your background. Do you have any questions for me regarding the role or the team?";
 
+      if (!askedTexts.has(closingQuestion)) {
         await AIContextRepository.pushAskedQuestion(
           meetingId,
           closingQuestion,
           InterviewStage.WRAP_UP
         );
-
         return {
           question: closingQuestion,
           stage: InterviewStage.WRAP_UP
         };
       }
-    }
 
-    // 3️⃣ Wrap-Up Loop (Just keeps returning null or handles end of interview)
-    if (context.stage === InterviewStage.WRAP_UP) {
-      // If we already asked the closing question, we might just stop here
+      // Return null to signal completion
       return null;
     }
 

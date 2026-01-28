@@ -24,6 +24,7 @@ export default function InterviewRoomPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +58,20 @@ export default function InterviewRoomPage() {
             await new Promise(resolve => setTimeout(resolve, 800));
 
             const response = await interviewService.getNextQuestion(meetingId);
+
+            if (response.data.finished) {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: "ai",
+                        content: response.data.message || "Interview completed. Thank you for your time!",
+                        timestamp: new Date(),
+                    },
+                ]);
+                setIsFinished(true);
+                return;
+            }
+
             const question = response.data.question;
 
             setMessages((prev) => {
@@ -106,6 +121,20 @@ export default function InterviewRoomPage() {
 
             // Fetch next question
             const response = await interviewService.getNextQuestion(meetingId);
+
+            if (response.data.finished) {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: "ai",
+                        content: response.data.message || "Interview completed. Thank you for your time!",
+                        timestamp: new Date(),
+                    },
+                ]);
+                setIsFinished(true);
+                return;
+            }
+
             const question = response.data.question;
 
             setMessages((prev) => {
@@ -258,9 +287,9 @@ export default function InterviewRoomPage() {
                             <Textarea
                                 value={currentAnswer}
                                 onChange={(e) => setCurrentAnswer(e.target.value)}
-                                placeholder="Type your answer here... (Ctrl + Enter to submit)"
+                                placeholder={isFinished ? "Interview completed." : "Type your answer here... (Ctrl + Enter to submit)"}
                                 className="min-h-[120px] resize-none border-border/50 focus:border-primary/50 transition-colors bg-background/50"
-                                disabled={loading}
+                                disabled={loading || isFinished}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && e.ctrlKey) {
                                         e.preventDefault();
@@ -270,7 +299,7 @@ export default function InterviewRoomPage() {
                             />
                             <Button
                                 onClick={handleSubmitAnswer}
-                                disabled={loading || !currentAnswer.trim()}
+                                disabled={loading || !currentAnswer.trim() || isFinished}
                                 className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 h-auto px-8 shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-50"
                             >
                                 {loading ? (

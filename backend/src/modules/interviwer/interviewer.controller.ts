@@ -8,6 +8,10 @@ export class InterviewerController {
 
     const result = await InterviewerService.getNextQuestion(meetingId);
 
+    if (!result) {
+      return res.json({ finished: true, message: "Interview completed" });
+    }
+
     return res.json(result);
   }
 }

@@ -154,8 +154,16 @@ export class ResumeService {
       "scrum",
     ];
 
-    return keywords.filter((k) =>
-      text.toLowerCase().includes(k)
-    );
+    return keywords.filter((k) => {
+      // Escape special regex characters like . and + (for C++, .NET, etc.)
+      const escapedKey = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Use word boundaries. 
+      // Note: \b works for words, but for things like C# or .NET it can be tricky.
+      // A simple approach is roughly: (\s|^)KEY(\s|$|,)
+      const regex = new RegExp(`(^|\\b|\\s)${escapedKey}(\\b|\\s|$|,)`, 'i');
+
+      return regex.test(text);
+    });
   }
 }
