@@ -68,23 +68,38 @@ export const NavBarHeader: React.FC = () => {
     };
   }, []);
 
+  const [greeting, setGreeting] = useState("Welcome back");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+  }, []);
+
   return (
-    <div className="flex items-center justify-between gap-4 w-full">
+    <div className="flex items-center justify-between gap-4 w-full bg-card/50 backdrop-blur-md p-4 rounded-2xl border border-border/50 shadow-sm transition-all duration-300 hover:shadow-md">
       {/* Left: Logo + Greeting */}
       <div className="flex items-center gap-4">
-        <img
-          src="/logo.png"
-          alt="App logo"
-          className="h-10 w-10 rounded-md object-cover"
-        />
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          <img
+            src="/logo.png"
+            alt="App logo"
+            className="relative h-12 w-12 rounded-lg object-cover bg-background"
+          />
+        </div>
 
         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-            Welcome back, {user?.username || "User"}{" "}
-            <span className="animate-wave inline-block origin-[70%_70%]">👋</span>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl flex items-center gap-2">
+            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              {greeting}, {user?.username || "User"}
+            </span>
+            <span className="animate-wave inline-block origin-[70%_70%] hover:animate-spin cursor-default">👋</span>
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            Ready to start a smart meeting?
+          <p className="text-muted-foreground text-sm md:text-base flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            Ready to ace your next interview?
           </p>
         </div>
       </div>

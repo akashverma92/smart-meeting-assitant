@@ -23,8 +23,10 @@ export const useAuth = () => {
 
   // ✅ Auto-fetch user on first load if cookies exist
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (!user) {
+      fetchUser();
+    }
+  }, [user]);
 
   return { user, loading, error, login, register, googleLogin, fetchUser, logoutUser };
 };

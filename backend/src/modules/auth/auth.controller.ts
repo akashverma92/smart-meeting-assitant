@@ -42,7 +42,7 @@ export const AuthController = {
 
   // refersh token handled in refreshToken.controller.ts
   refresh: (async (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refresh_token;
 
     if (!refreshToken) {
       return res.status(401).json({ message: "No refresh token provided" });
@@ -75,7 +75,7 @@ export const AuthController = {
    * LOGOUT (invalidate refresh token)
    */
   logout: (async (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies.refresh_token;
 
     if (refreshToken) {
       await RefreshTokenRepository.revoke(refreshToken);

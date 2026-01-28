@@ -7,10 +7,12 @@ export interface Organization {
 
 export interface User {
   id: string;
-  name: string;
+  username: string; // Matches backend
+  name?: string;    // Keep for compatibility if needed
   email: string;
   authProvider: AuthProvider;
 
+  avatarUrl?: string; // Matches backend
   profileImage?: string;
   organization?: Organization;
 
