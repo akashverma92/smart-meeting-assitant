@@ -7,6 +7,7 @@ import {
 } from "../../utils/auth-cookie";
 import { AuthRequest } from "../../middlewares/auth.middleware";
 import { UserModel } from "../user/user.model";
+import { RefreshTokenRepository } from "./refreshToken.repository";
 
 export const AuthController = {
   /**
@@ -74,12 +75,10 @@ export const AuthController = {
    * LOGOUT (invalidate refresh token)
    */
   logout: (async (req, res) => {
-    const authReq = req as AuthRequest;
+    const refreshToken = req.cookies.refreshToken;
 
-    if (authReq.user?.userId) {
-      await UserModel.findByIdAndUpdate(authReq.user.userId, {
-        refreshToken: null,
-      });
+    if (refreshToken) {
+      await RefreshTokenRepository.revoke(refreshToken);
     }
 
     clearAuthCookies(res);
