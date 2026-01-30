@@ -37,7 +37,7 @@ const InterviewAnswerSchema = new Schema(
       type: String,
       default: null,
     },
-        humanScore: {
+    humanScore: {
       type: Number,
       min: 0,
       max: 10,

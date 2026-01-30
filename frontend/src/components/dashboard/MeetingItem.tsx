@@ -35,7 +35,12 @@ export const MeetingItem = ({ id, title, date, type, duration }: MeetingItemProp
                 </div>
             </div>
 
-            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+                variant="ghost"
+                size="sm"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => window.location.href = `/meetings/${id}/summary`} // Using simple nav for now
+            >
                 View Summary
             </Button>
         </div>

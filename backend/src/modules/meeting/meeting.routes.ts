@@ -46,5 +46,41 @@ router.post("/start", requireAuth, async (req, res) => {
   });
 });
 
+router.get("/history", requireAuth, async (req, res) => {
+  try {
+    const meetings = await MeetingModel.find({ createdBy: req.user!.userId })
+      .sort({ createdAt: -1 }) // Newest first
+      .select("meetingCode state createdAt"); // Select relevant fields
+
+    return res.status(200).json({ meetings });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+
+import { InterviewAnswerModel } from "../interviwer/interviewAnswer.model";
+
+router.get("/:id/summary", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const meeting = await MeetingModel.findOne({
+      _id: id,
+      createdBy: req.user!.userId
+    });
+
+    if (!meeting) {
+      return res.status(404).json({ message: "Meeting not found" });
+    }
+
+    const answers = await InterviewAnswerModel.find({ meetingId: id })
+      .sort({ createdAt: 1 }); // Chronological order
+
+    return res.status(200).json({ meeting, answers });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+});
 
 export default router;

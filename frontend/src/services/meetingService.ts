@@ -14,4 +14,10 @@ export const meetingService = {
             },
         });
     },
+
+    // Get meeting history
+    getHistory: () => api.get("/meetings/v1/history"),
+
+    // Get specific meeting summary
+    getSummary: (meetingId: string) => api.get(`/meetings/v1/${meetingId}/summary`),
 };

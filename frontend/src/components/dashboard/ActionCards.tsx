@@ -88,6 +88,7 @@ export const ActionCards = () => {
                 description="View your past meetings and recordings"
                 gradient="from-amber-500 to-orange-600"
                 delay="200ms"
+                onClick={() => router.push('/history')}
             />
             <ActionCard
                 icon={FileBarChart}
