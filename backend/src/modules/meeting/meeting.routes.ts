@@ -46,11 +46,27 @@ router.post("/start", requireAuth, async (req, res) => {
   });
 });
 
+
 router.get("/history", requireAuth, async (req, res) => {
   try {
     const meetings = await MeetingModel.find({ createdBy: req.user!.userId })
       .sort({ createdAt: -1 }) // Newest first
       .select("meetingCode state createdAt"); // Select relevant fields
+
+    return res.status(200).json({ meetings });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+import { requireAdmin } from "../../middlewares/auth.middleware";
+import { UserModel } from "../user/user.model";
+
+router.get("/admin/all", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const meetings = await MeetingModel.find({})
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "username email");
 
     return res.status(200).json({ meetings });
   } catch (err: any) {
@@ -78,6 +94,27 @@ router.get("/:id/summary", requireAuth, async (req, res) => {
       .sort({ createdAt: 1 }); // Chronological order
 
     return res.status(200).json({ meeting, answers });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/:id/evaluate", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { score, feedback } = req.body;
+
+    const meeting = await MeetingModel.findByIdAndUpdate(
+      id,
+      { adminScore: score, adminFeedback: feedback },
+      { new: true }
+    );
+
+    if (!meeting) {
+      return res.status(404).json({ message: "Meeting not found" });
+    }
+
+    return res.status(200).json({ meeting });
   } catch (err: any) {
     return res.status(500).json({ message: err.message });
   }

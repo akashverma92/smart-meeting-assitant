@@ -27,10 +27,15 @@ router.get(
   passport.authenticate("google", { session: false }),
   (req, res) => {
     // @ts-ignore
-    const { accessToken, refreshToken } = req.user;
+    const { accessToken, refreshToken, user } = req.user;
     setAccessTokenCookie(res, accessToken);
     setRefreshTokenCookie(res, refreshToken);
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+
+    const redirectUrl = user.role === "admin"
+      ? `${process.env.FRONTEND_URL}/admin/dashboard`
+      : `${process.env.FRONTEND_URL}/dashboard`;
+
+    res.redirect(redirectUrl);
   }
 );
 

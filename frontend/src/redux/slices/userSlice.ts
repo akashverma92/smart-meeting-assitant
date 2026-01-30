@@ -15,7 +15,8 @@ export const loginUser = createAsyncThunk(
   async (data: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const res = await authService.login(data);
-
+      console.log("Login API Response Data:", res.data); // DEBUG
+      console.log("Returning user from Thunk:", res.data.user); // DEBUG
       return res.data.user;
     } catch (err: any) {
       // Return the full error data so the UI helper can parse it
@@ -41,6 +42,7 @@ export const registerUser = createAsyncThunk(
 export const fetchMe = createAsyncThunk("user/me", async (_, { rejectWithValue }) => {
   try {
     const res = await authService.me();
+    console.log("fetchMe response:", res.data); // DEBUG
     return res.data;
   } catch (err: any) {
     return rejectWithValue(err.response?.data || err.message);

@@ -2,26 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/src/redux/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { meetingService } from "@/src/services/meetingService";
-import { Loader2, ArrowLeft, Calendar, Clock, MessageSquare, Award, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, ArrowLeft, Calendar, Clock, MessageSquare, Award, CheckCircle2, AlertCircle, Save } from "lucide-react";
 import { Badge } from "@/src/components/ui/badge";
+import { Textarea } from "@/src/components/ui/textarea";
+import { Input } from "@/src/components/ui/input";
 
 export default function MeetingSummaryPage() {
     const params = useParams();
     const router = useRouter();
     const meetingId = params.id as string;
+    const { user } = useSelector((state: RootState) => state.user);
 
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [evalData, setEvalData] = useState({ score: "", feedback: "" });
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         const fetchSummary = async () => {
             try {
                 const res = await meetingService.getSummary(meetingId);
                 setData(res.data);
+                if (res.data.meeting.adminScore) {
+                    setEvalData({
+                        score: res.data.meeting.adminScore,
+                        feedback: res.data.meeting.adminFeedback || ""
+                    });
+                }
             } catch (err: any) {
                 setError(err.response?.data?.message || "Failed to load summary");
             } finally {
@@ -33,6 +46,21 @@ export default function MeetingSummaryPage() {
             fetchSummary();
         }
     }, [meetingId]);
+
+    const handleSaveEvaluation = async () => {
+        setSaving(true);
+        try {
+            await meetingService.evaluateMeeting(meetingId, {
+                score: Number(evalData.score),
+                feedback: evalData.feedback
+            });
+            alert("Evaluation saved!");
+        } catch (err) {
+            alert("Failed to save evaluation");
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -131,6 +159,55 @@ export default function MeetingSummaryPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Admin Evaluation Section */}
+                {(user?.role === "admin" || meeting.adminScore != null) && (
+                    <Card className="bg-card/80 backdrop-blur-xl border-border/50 shadow-xl overflow-hidden">
+                        <div className="h-2 bg-gradient-to-r from-orange-400 to-red-600" />
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Award className="h-6 w-6 text-orange-500" />
+                                Official Evaluation
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {user?.role === "admin" ? (
+                                <div className="space-y-4">
+                                    <div className="grid gap-2">
+                                        <label className="text-sm font-medium">Score (0-10)</label>
+                                        <Input
+                                            type="number"
+                                            max={10}
+                                            min={0}
+                                            value={evalData.score}
+                                            onChange={(e) => setEvalData({ ...evalData, score: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <label className="text-sm font-medium">Feedback</label>
+                                        <Textarea
+                                            value={evalData.feedback}
+                                            onChange={(e) => setEvalData({ ...evalData, feedback: e.target.value })}
+                                            placeholder="Enter detailed feedback here..."
+                                        />
+                                    </div>
+                                    <Button onClick={handleSaveEvaluation} disabled={saving}>
+                                        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                        Save Evaluation
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-4xl font-bold text-orange-500">{meeting.adminScore}/10</div>
+                                        <div className="text-sm text-muted-foreground">Official Score</div>
+                                    </div>
+                                    <p className="whitespace-pre-wrap">{meeting.adminFeedback}</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Q&A Timeline */}
                 <div className="space-y-6">

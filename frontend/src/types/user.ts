@@ -16,7 +16,7 @@ export interface User {
   profileImage?: string;
   organization?: Organization;
 
-  role: "individual";
+  role: "user" | "admin";
   onboardingCompleted: boolean;
 
   createdAt: string;

@@ -41,6 +41,10 @@ const MeetingSchema = new Schema(
 
     startedAt: Date,
     endedAt: Date,
+
+    // Admin Evaluation
+    adminScore: { type: Number, min: 0, max: 10 },
+    adminFeedback: { type: String },
   },
   { timestamps: true }
 );
@@ -54,6 +58,8 @@ export interface IMeeting extends Document {
   preparationEndsAt?: Date;
   startedAt?: Date;
   endedAt?: Date;
+  adminScore?: number;
+  adminFeedback?: string;
   createdAt: Date;
   updatedAt: Date;
 }

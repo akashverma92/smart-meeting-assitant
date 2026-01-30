@@ -14,6 +14,10 @@ import { RefreshTokenRepository } from "./refreshToken.repository";
 const sanitizeUser = (user: any) => {
   const obj = user.toObject ? user.toObject() : { ...user };
   delete obj.password;
+  // Make sure role is definitely included if it exists in the schema
+  if (user.role) {
+    obj.role = user.role;
+  }
   return obj;
 };
 
@@ -84,8 +88,11 @@ export const AuthService = {
       ),
     });
 
+    const sanitized = sanitizeUser(user);
+    console.log("Sanitized User:", sanitized);
+
     return {
-      user: sanitizeUser(user),
+      user: sanitized,
       accessToken,
       refreshToken,
     };

@@ -18,6 +18,13 @@ export const meetingService = {
     // Get meeting history
     getHistory: () => api.get("/meetings/v1/history"),
 
+    // Admin: Get all meetings
+    getAllMeetings: () => api.get("/meetings/v1/admin/all"),
+
     // Get specific meeting summary
     getSummary: (meetingId: string) => api.get(`/meetings/v1/${meetingId}/summary`),
+
+    // Admin: Evaluate meeting
+    evaluateMeeting: (meetingId: string, data: { score: number; feedback: string }) =>
+        api.post(`/meetings/v1/${meetingId}/evaluate`, data),
 };
