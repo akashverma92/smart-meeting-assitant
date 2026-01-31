@@ -1,7 +1,6 @@
 // this file contains the dialog component for login and signup functionality.
 
 "use client";
-
 import { Button } from "@/src/components/ui/button";
 import {
   Dialog,
@@ -29,7 +28,7 @@ export default function AuthDialog() {
       <DialogContent className="sm:max-w-[380px] text-center">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            Welcome to SmartMeet
+            Welcome to AI-Led Interviews
           </DialogTitle>
         </DialogHeader>
 
