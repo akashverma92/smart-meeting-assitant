@@ -1,4 +1,4 @@
-"use client";
+
 import { BarChart, MessagesSquare, Brain } from "lucide-react";
 export default function FeatureCards() {
   return (

@@ -4,7 +4,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@/src/hooks/useAuth";
 import { useEffect, useState } from "react";
 import GoogleLoginButton from "./GoogleLoginButton";
 import { Eye, EyeOff } from "lucide-react";

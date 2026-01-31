@@ -1,6 +1,6 @@
 // its used for background animation in landing page
 
-"use client";
+
 
 export default function BackgroundAnimation() {
   return (

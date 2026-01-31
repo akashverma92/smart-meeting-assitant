@@ -1,7 +1,7 @@
 // this going to be the landing page of the applciation.
 // it will contain the basic information about the application and a button to navigate to the main app.
 
-"use client";
+
 
 import Hero from "@/src/components/landing/Hero";
 import FeatureCards from "@/src/components/landing/FeatureCards";

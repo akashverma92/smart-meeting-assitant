@@ -4,7 +4,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@/src/hooks/useAuth";
 import { useState } from "react";
 import GoogleLoginButton from "./GoogleLoginButton";
 import { Eye, EyeOff } from "lucide-react";
@@ -66,7 +66,7 @@ export default function RegisterForm() {
 
     setLoading(true);
     try {
-      await register(name, email, password);
+      await register({ username: name, email, password });
     } catch (err) {
       setError("Registration failed. Please try again.");
     } finally {

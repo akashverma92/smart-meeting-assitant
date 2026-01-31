@@ -20,47 +20,29 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        alert("AdminDashboard MOUNTED! User: " + (user ? user.role : "null")); // ALERT
-        console.log("AdminDashboard user state:", user); // DEBUG
-
-        // 1. If user is null, we might be reloading. Wait for it?
-        // But if loading is false, and user is null, we should redirect to login?
-        // Actually, let's just trace what happens when user arrives with role 'admin'
-
-        if (user) {
-            console.log("AdminDashboard Check - User:", JSON.stringify(user, null, 2));
+        if (!authLoading && user) {
             if (user.role !== "admin") {
-                console.warn("User is not admin (role: " + user.role + "), WOULD redirect to /dashboard");
-                // router.push("/dashboard"); 
-                // return;
+                router.replace("/dashboard");
             } else {
-                console.log("User is admin, fetching meetings...");
+                fetchAllMeetings();
             }
+        } else if (!authLoading && !user) {
+            router.replace("/auth/login");
         }
+    }, [user, authLoading, router]);
 
-        const fetchAllMeetings = async () => {
-            try {
-                const res = await meetingService.getAllMeetings();
-                setMeetings(res.data.meetings);
-            } catch (error) {
-                console.error("Failed to fetch meetings", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (user?.role === "admin") {
-            fetchAllMeetings();
-        } else {
-            // If user is null or not admin, we are loading or redirecting.
-            // If user is null, keep loading?
-            if (!user) {
-                console.log("User is null, waiting...");
-            }
+    const fetchAllMeetings = async () => {
+        try {
+            const res = await meetingService.getAllMeetings();
+            setMeetings(res.data.meetings);
+        } catch (error) {
+            console.error("Failed to fetch meetings", error);
+        } finally {
+            setLoading(false);
         }
-    }, [user, router]);
+    };
 
-    if (loading) {
+    if (authLoading || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -69,15 +51,7 @@ export default function AdminDashboard() {
     }
 
     if (!user || user.role !== "admin") {
-        return (
-            <div className="p-10 text-red-500 min-h-screen bg-black">
-                <h1>DEBUG MODE</h1>
-                <p>User: {user ? user.username : "NULL"}</p>
-                <p>Role: {user ? user.role : "NULL"}</p>
-                <p>This page should be accessible to ADMINS only.</p>
-                <button className="border p-2 mt-4" onClick={() => router.push('/dashboard')}>Go to User Dashboard</button>
-            </div>
-        );
+        return null; // Don't render anything while redirecting
     }
 
     return (
