@@ -1,33 +1,26 @@
-// it contians the feature cards section of the landing page
-
 "use client";
-
-import { Copy, Mic, Video } from "lucide-react";
-
+import { BarChart, MessagesSquare, Brain } from "lucide-react";
 export default function FeatureCards() {
   return (
     <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
       <FeatureCard
-        icon={<Video className="w-6 h-6 text-blue-400" />}
-        title="Crystal Clear Video"
-        description="High-definition video calling powered by WebRTC."
+        icon={<Brain className="w-6 h-6 text-blue-400" />}
+        title="AI-Led Interviews"
+        description="Experience structured interviews hosted by AI that ask intelligent questions and guide the entire flow."
       />
-
       <FeatureCard
-        icon={<Mic className="w-6 h-6 text-indigo-400" />}
-        title="Real-time AI Audio"
-        description="Live transcription and smart audio processing."
+        icon={<MessagesSquare className="w-6 h-6 text-indigo-400" />}
+        title="Adaptive Question Flow"
+        description="Questions adapt dynamically based on your responses, helping assess depth, clarity, and understanding."
       />
-
       <FeatureCard
-        icon={<Copy className="w-6 h-6 text-purple-400" />}
-        title="Smart Summaries"
-        description="Automated meeting minutes and action item extraction."
+        icon={<BarChart className="w-6 h-6 text-purple-400" />}
+        title="Interview Insights"
+        description="Get clear feedback, summaries, and performance insights after every interview session."
       />
     </div>
   );
 }
-
 function FeatureCard({
   icon,
   title,
@@ -38,12 +31,44 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-colors backdrop-blur-sm">
-      <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center mb-4">
+    <div className="
+      group
+      relative
+      p-8
+      rounded-2xl
+      bg-gradient-to-b from-white/[0.08] to-white/[0.02]
+      border border-white/15
+      shadow-lg shadow-black/20
+      backdrop-blur-sm
+      transition-all duration-300
+      hover:-translate-y-2
+      hover:shadow-blue-500/20
+      hover:border-blue-500/40
+    ">
+      {/* Icon container */}
+      <div className="
+        w-14 h-14
+        rounded-xl
+        bg-gradient-to-br from-white/10 to-white/5
+        flex items-center justify-center
+        mb-6
+        ring-1 ring-white/20
+        group-hover:ring-blue-500/40
+        transition-all
+      ">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
-      <p className="text-gray-400 leading-relaxed">{description}</p>
+
+      {/* Title */}
+      <h3 className="text-2xl font-bold mb-3 text-white tracking-tight">
+        {title}
+      </h3>
+
+      {/* Description */}
+      <p className="text-gray-300 leading-relaxed text-sm">
+        {description}
+      </p>
     </div>
   );
 }
+
