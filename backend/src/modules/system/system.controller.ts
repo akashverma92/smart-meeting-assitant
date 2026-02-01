@@ -28,7 +28,6 @@ export const SystemController = {
       });
 
       // Simple aggregation for chart data (last 7 days meetings)
-      // This is a basic implementation. For production, use better aggregations.
       const last7Days = await MeetingModel.aggregate([
         {
           $match: {
@@ -46,11 +45,42 @@ export const SystemController = {
         { $sort: { _id: 1 } },
       ]);
 
+      // Aggregate top users by interview count
+      const topUsers = await MeetingModel.aggregate([
+        {
+          $group: {
+            _id: "$createdBy",
+            interviewCount: { $sum: 1 },
+          },
+        },
+        { $sort: { interviewCount: -1 } },
+        { $limit: 5 },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        { $unwind: "$user" },
+        {
+          $project: {
+            _id: 1,
+            username: "$user.username",
+            email: "$user.email",
+            avatarUrl: "$user.avatarUrl",
+            interviewCount: 1,
+          },
+        },
+      ]);
+
       res.status(200).json({
         totalUsers: userCount,
         totalInterviews: meetingCount,
         activeInterviews: activeMeetings,
         chartData: last7Days,
+        topUsers,
       });
     } catch (error) {
       console.error("Stats Error:", error);
