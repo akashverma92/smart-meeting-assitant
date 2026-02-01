@@ -89,7 +89,36 @@ export const SystemController = {
   },
   async getUsersReport(req: Request, res: Response) {
     try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
+      const skip = (page - 1) * limit;
+
+      const matchStage = search
+        ? {
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
+        : {};
+
+      const totalUsers = await UserModel.countDocuments(matchStage);
+
       const users = await UserModel.aggregate([
+        { $match: matchStage },
+        {
+          $project: {
+            username: 1,
+            email: 1,
+            avatarUrl: 1,
+            createdAt: 1,
+            _id: 1
+          }
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
         {
           $lookup: {
             from: "meetings",
@@ -122,10 +151,17 @@ export const SystemController = {
             },
           },
         },
-        { $sort: { createdAt: -1 } },
       ]);
 
-      res.status(200).json(users);
+      res.status(200).json({
+        data: users,
+        pagination: {
+          total: totalUsers,
+          page,
+          limit,
+          totalPages: Math.ceil(totalUsers / limit),
+        },
+      });
     } catch (error) {
       console.error("Users Report Error:", error);
       res.status(500).json({ message: "Failed to fetch users report" });
