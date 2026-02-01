@@ -2,6 +2,8 @@
 import { AIContextRepository } from "../ai-context/aiContext.repository";
 import { InterviewStage } from "../ai-context/aiContext.types";
 import { WARMUP_QUESTIONS, TECHNICAL_QUESTION_BANK, HR_QUESTIONS } from "./interviewer.prompts";
+import { MeetingModel } from "../meeting/meeting.model";
+import { MeetingState } from "../meeting/meeting.state";
 
 export class InterviewerService {
   static async getNextQuestion(meetingId: string): Promise<{ question: string; stage: string } | null> {
@@ -24,6 +26,14 @@ export class InterviewerService {
       const nextQuestion = WARMUP_QUESTIONS.find((q) => !askedTexts.has(q));
 
       if (nextQuestion) {
+        // 🕒 Start the meeting timer if it's the very first question
+        if (askedTexts.size === 0) {
+          await MeetingModel.findByIdAndUpdate(meetingId, {
+            startedAt: new Date(),
+            state: MeetingState.INTERVIEW_STARTED
+          });
+        }
+
         await AIContextRepository.pushAskedQuestion(
           meetingId,
           nextQuestion,
@@ -165,6 +175,12 @@ export class InterviewerService {
           stage: InterviewStage.WRAP_UP
         };
       }
+
+      // 🏁 End the meeting timer
+      await MeetingModel.findByIdAndUpdate(meetingId, {
+        endedAt: new Date(),
+        state: MeetingState.COMPLETED
+      });
 
       // Return null to signal completion
       return null;

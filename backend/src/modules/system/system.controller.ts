@@ -87,4 +87,48 @@ export const SystemController = {
       res.status(500).json({ message: "Failed to fetch stats" });
     }
   },
+  async getUsersReport(req: Request, res: Response) {
+    try {
+      const users = await UserModel.aggregate([
+        {
+          $lookup: {
+            from: "meetings",
+            localField: "_id",
+            foreignField: "createdBy",
+            as: "meetings",
+          },
+        },
+        {
+          $project: {
+            username: 1,
+            email: 1,
+            avatarUrl: 1,
+            createdAt: 1,
+            totalMeetings: { $size: "$meetings" },
+            totalDurationMs: {
+              $sum: {
+                $map: {
+                  input: "$meetings",
+                  as: "m",
+                  in: {
+                    $cond: {
+                      if: { $and: ["$$m.startedAt", "$$m.endedAt"] },
+                      then: { $subtract: ["$$m.endedAt", "$$m.startedAt"] },
+                      else: 0,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ]);
+
+      res.status(200).json(users);
+    } catch (error) {
+      console.error("Users Report Error:", error);
+      res.status(500).json({ message: "Failed to fetch users report" });
+    }
+  },
 };

@@ -4,4 +4,7 @@ export const adminService = {
     getStats: async () => {
         return await axiosClient.get("/system/v1/stats");
     },
+    getUsersReport: async () => {
+        return await axiosClient.get("/system/v1/users-report");
+    },
 };

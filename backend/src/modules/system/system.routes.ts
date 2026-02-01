@@ -9,5 +9,6 @@ router.get("/health", SystemController.health);
 
 import { requireAuth, requireAdmin } from "../../middlewares/auth.middleware";
 router.get("/stats", requireAuth, requireAdmin, SystemController.getDashboardStats);
+router.get("/users-report", requireAuth, requireAdmin, SystemController.getUsersReport);
 
 export default router;
