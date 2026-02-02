@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { UserModel } from "../user/user.model";
 import { MeetingModel } from "../meeting/meeting.model";
+import { InterviewAnswerModel } from "../interviwer/interviewAnswer.model";
 
 export const SystemController = {
   async health(req: Request, res: Response) {
@@ -165,6 +166,101 @@ export const SystemController = {
     } catch (error) {
       console.error("Users Report Error:", error);
       res.status(500).json({ message: "Failed to fetch users report" });
+    }
+  },
+
+  async getCompletedMeetings(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
+      const skip = (page - 1) * limit;
+
+      const matchStage: any = { state: "COMPLETED" };
+
+      if (search) {
+        const users = await UserModel.find({
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }).select("_id");
+        matchStage.createdBy = { $in: users.map((u) => u._id) };
+      }
+
+      const total = await MeetingModel.countDocuments(matchStage);
+
+      const meetings = await MeetingModel.find(matchStage)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("createdBy", "username email avatarUrl");
+
+      res.status(200).json({
+        data: meetings,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (error) {
+      console.error("Completed Meetings Error:", error);
+      res.status(500).json({ message: "Failed to fetch completed meetings" });
+    }
+  },
+
+  async getMeetingDetailsAdmin(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const meeting = await MeetingModel.findById(id).populate(
+        "createdBy",
+        "username email avatarUrl"
+      );
+
+      if (!meeting) {
+        return res.status(404).json({ message: "Meeting not found" });
+      }
+
+      const answers = await InterviewAnswerModel.find({ meetingId: id }).sort({
+        createdAt: 1,
+      });
+
+      res.status(200).json({ meeting, answers });
+    } catch (error) {
+      console.error("Meeting Details Error:", error);
+      res.status(500).json({ message: "Failed to fetch meeting details" });
+    }
+  },
+
+  async gradeMeeting(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { score, feedback } = req.body;
+
+      if (typeof score !== "number" || score < 0 || score > 10) {
+        return res.status(400).json({ message: "Invalid score (0-10)" });
+      }
+
+      const meeting = await MeetingModel.findByIdAndUpdate(
+        id,
+        {
+          adminScore: score,
+          adminFeedback: feedback,
+        },
+        { new: true }
+      );
+
+      if (!meeting) {
+        return res.status(404).json({ message: "Meeting not found" });
+      }
+
+      res.status(200).json({ meeting });
+    } catch (error) {
+      console.error("Grading Error:", error);
+      res.status(500).json({ message: "Failed to grade meeting" });
     }
   },
 };
